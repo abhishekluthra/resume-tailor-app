@@ -76,7 +76,7 @@ export default function Home() {
                 </div>
                 <h4 className="text-xl font-semibold text-gray-900 mb-3">Upload Documents</h4>
                 <p className="text-gray-600">
-                  Upload your current resume and the job posting you're interested in
+                  Upload your current resume and the job posting you&apos;re interested in
                 </p>
               </div>
               

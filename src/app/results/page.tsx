@@ -1,212 +1,128 @@
 'use client';
 
-import { useAnalysis } from '@/context/AnalysisContext';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
-import { getScoreColor, getImpactColor } from '@/utils/colors';
-import { 
-  AnalysisResult, 
-  InvalidJobPostingError,
-  isInvalidJobPostingError 
-} from '@/types/resume-analysis';
+import { UploadForm } from '@/components/UploadForm';
+import { DisclaimerModal } from '@/components/DisclaimerModal';
+import { useDisclaimer } from '@/context/DisclaimerContext';
 
-// Component for displaying invalid job posting error
-function InvalidJobPostingDisplay({ errorData }: { errorData: InvalidJobPostingError }) {
-  const router = useRouter();
+export default function Home() {
+  const { hasAcceptedDisclaimer, setHasAcceptedDisclaimer } = useDisclaimer();
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="bg-white shadow rounded-lg p-6">
-        <div className="text-center">
-          {/* Error Icon */}
-          <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
-            <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-            </svg>
-          </div>
-          
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Invalid Job Posting</h1>
-          <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-            {errorData.message}
-          </p>
-        </div>
-
-        {/* Suggestions */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-          <h2 className="text-lg font-semibold text-blue-900 mb-3">
-            To create a valid job posting, please include:
-          </h2>
-          <ul className="space-y-2">
-            {errorData.suggestions.map((suggestion, index) => (
-              <li key={index} className="flex items-start">
-                <svg className="h-5 w-5 text-blue-600 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-                <span className="text-blue-800">{suggestion}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <button
-            onClick={() => router.push('/')}
-            className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
-            <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-            </svg>
-            Go Back and Try Again
-          </button>
-          <button
-            onClick={() => window.location.reload()}
-            className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
-            <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
-            </svg>
-            Refresh Page
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Component for displaying valid analysis results
-function AnalysisResultDisplay({ analysisResult }: { analysisResult: AnalysisResult }) {
-  return (
-    <div className="max-w-4xl mx-auto">
-      <div className="bg-white shadow rounded-lg p-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Analysis Results</h1>
-        
-        {/* Scores Table */}
-        <div className="mb-8">
-          <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
-            <table className="min-w-full divide-y divide-gray-300">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
-                    Category
-                  </th>
-                  <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                    Score
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 bg-white">
-                <tr>
-                  <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                    Overall Score
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-4 text-sm">
-                    <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${getScoreColor(analysisResult.overallScore)}`}>
-                      {analysisResult.overallScore}
+    <>
+      <DisclaimerModal 
+        isOpen={!hasAcceptedDisclaimer}
+        onAccept={() => setHasAcceptedDisclaimer(true)}
+      />
+      
+      {hasAcceptedDisclaimer && (
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+          {/* Hero Section */}
+          <div className="relative overflow-hidden">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-20">
+              <div className="text-center">
+                {/* Main Heading */}
+                <div className="space-y-4 mb-8">
+                  <h1 className="text-5xl md:text-6xl font-extrabold text-gray-900 leading-tight">
+                    <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                      ResuMold
                     </span>
-                  </td>
-                </tr>
-                {Object.entries(analysisResult.categoryScores).map(([category, score]) => (
-                  <tr key={category}>
-                    <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                      {category.replace(/([A-Z])/g, ' $1').trim()}
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-4 text-sm">
-                      <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${getScoreColor(score)}`}>
-                        {score}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+                  </h1>
+                  <h2 className="text-2xl md:text-3xl font-bold text-gray-800 max-w-4xl mx-auto">
+                    Mold your resume to fit the job you want
+                  </h2>
+                  <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+                    Get personalized analysis and AI-powered recommendations to optimize your resume for any job posting
+                  </p>
+                </div>
 
-        {/* Executive Summary */}
-        <div className="mb-8">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Executive Summary</h2>
-          <p className="text-gray-600">{analysisResult.executiveSummary}</p>
-        </div>
-
-        {/* Job Analysis */}
-        <div className="mb-8">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Job Analysis</h2>
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-md font-medium text-gray-700 mb-2">Required Skills</h3>
-              <ul className="list-disc list-inside text-gray-600">
-                {analysisResult.jobAnalysis.requiredSkills.map((skill, index) => (
-                  <li key={index}>{skill}</li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-md font-medium text-gray-700 mb-2">Key Experiences</h3>
-              <ul className="list-disc list-inside text-gray-600">
-                {analysisResult.jobAnalysis.keyExperiences.map((exp, index) => (
-                  <li key={index}>{exp}</li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-md font-medium text-gray-700 mb-2">Primary Responsibilities</h3>
-              <ul className="list-disc list-inside text-gray-600">
-                {analysisResult.jobAnalysis.primaryResponsibilities.map((resp, index) => (
-                  <li key={index}>{resp}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        {/* Recommendations */}
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Recommendations</h2>
-          <div className="space-y-4">
-            {analysisResult.recommendations.map((rec) => (
-              <div key={rec.id} className="border rounded-lg p-4">
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="text-md font-medium text-gray-900">{rec.title}</h3>
-                  <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${getImpactColor(rec.impact)}`}>
-                    {rec.impact} Impact
+                {/* Feature Pills */}
+                <div className="flex flex-wrap justify-center gap-3 mb-12">
+                  <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                    ✨ AI-Powered Analysis
+                  </span>
+                  <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                    🎯 Job-Specific Tailoring
+                  </span>
+                  <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+                    📊 Detailed Insights
+                  </span>
+                  <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-orange-100 text-orange-800">
+                    ⚡ Instant Results
                   </span>
                 </div>
-                <p className="text-gray-600">{rec.description}</p>
-                <span className="inline-block mt-2 text-xs text-gray-500">{rec.category}</span>
               </div>
-            ))}
+            </div>
+
+            {/* Decorative Elements */}
+            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+              <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
+              <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
+            </div>
+          </div>
+
+          {/* How It Works Section */}
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+            <div className="text-center mb-16">
+              <h3 className="text-3xl font-bold text-gray-900 mb-4">How It Works</h3>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                Get your resume optimized in three simple steps
+              </p>
+            </div>
+            
+            <div className="grid md:grid-cols-3 gap-8">
+              <div className="text-center group">
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-blue-200 transition-colors">
+                  <span className="text-2xl font-bold text-blue-600">1</span>
+                </div>
+                <h4 className="text-xl font-semibold text-gray-900 mb-3">Upload Documents</h4>
+                <p className="text-gray-600">
+                  Upload your current resume and the job posting you&apos;re interested in
+                </p>
+              </div>
+              
+              <div className="text-center group">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-green-200 transition-colors">
+                  <span className="text-2xl font-bold text-green-600">2</span>
+                </div>
+                <h4 className="text-xl font-semibold text-gray-900 mb-3">AI Analysis</h4>
+                <p className="text-gray-600">
+                  Our AI analyzes your resume against the job requirements and industry standards
+                </p>
+              </div>
+              
+              <div className="text-center group">
+                <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-purple-200 transition-colors">
+                  <span className="text-2xl font-bold text-purple-600">3</span>
+                </div>
+                <h4 className="text-xl font-semibold text-gray-900 mb-3">Get Recommendations</h4>
+                <p className="text-gray-600">
+                  Receive detailed feedback and actionable suggestions to improve your resume
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Upload Section */}
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+            <div className="text-center mb-16">
+              <h3 className="text-3xl font-bold text-gray-900 mb-4">
+                Ready to get started?
+              </h3>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                Upload your resume and job posting below to receive your personalized analysis
+              </p>
+            </div>
+            
+            <div className="max-w-4xl mx-auto">
+              <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+                <div className="px-8 py-12">
+                  <UploadForm />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
+      )}
+    </>
   );
-}
-
-// Main component
-export default function ResultsPage() {
-  const router = useRouter();
-  const { analysisResult } = useAnalysis();
-
-  useEffect(() => {
-    if (!analysisResult) {
-      router.push('/');
-    }
-  }, [analysisResult, router]);
-
-  if (!analysisResult) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-gray-600">No analysis results found.</p>
-      </div>
-    );
-  }
-
-  // Check if the result is an invalid job posting error
-  if (isInvalidJobPostingError(analysisResult)) {
-    return <InvalidJobPostingDisplay errorData={analysisResult} />;
-  }
-
-  // Otherwise, display the normal analysis results
-  return <AnalysisResultDisplay analysisResult={analysisResult} />;
 }
