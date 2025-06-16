@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Resume Tailor - Optimize Your Resume for Job Applications",
+  title: "ResuMold - Optimize Your Resume for Job Applications",
   description: "Upload your resume and job posting to get personalized recommendations and learn resume best practices.",
 };
 

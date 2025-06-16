@@ -2,6 +2,7 @@
 
 import { useAnalysis } from '@/context/AnalysisContext';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export function Header() {
   const router = useRouter();
@@ -22,6 +23,11 @@ export function Header() {
           >
             New Analysis
           </button>
+        </div>
+        <div className="flex items-center">
+          <Link href="/" className="text-xl font-bold text-gray-900">
+            ResuMold
+          </Link>
         </div>
       </div>
     </header>

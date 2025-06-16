@@ -1,6 +1,6 @@
-# Resume Tailor
+# ResuMold
 
-Resume Tailor is a modern web application that helps job seekers optimize their resumes for specific job postings using AI-powered analysis. The application provides personalized recommendations and insights to improve resume effectiveness.
+ResuMold is a modern web application that helps job seekers optimize their resumes for specific job postings using AI-powered analysis. The application provides personalized recommendations and insights to improve resume effectiveness.
 
 ## Features
 
@@ -34,8 +34,8 @@ Resume Tailor is a modern web application that helps job seekers optimize their 
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/resume-tailor-app.git
-   cd resume-tailor-app
+   git clone https://github.com/yourusername/resumold.git
+   cd resumold
    ```
 
 2. Install dependencies:
@@ -70,7 +70,7 @@ Resume Tailor is a modern web application that helps job seekers optimize their 
 ## Project Structure
 
 ```
-resume-tailor-app/
+resumold/
 ├── src/
 │   ├── app/              # Next.js app directory
 │   ├── components/       # React components
