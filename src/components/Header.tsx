@@ -6,7 +6,7 @@ import Link from 'next/link';
 
 export function Header() {
   const router = useRouter();
-  const { setAnalysisResult } = useAnalysis();
+  const { analysisResult, setAnalysisResult } = useAnalysis();
 
   const handleNewAnalysis = () => {
     setAnalysisResult(null);
@@ -26,12 +26,14 @@ export function Header() {
           </Link>
           
           {/* Right side button */}
-          <button
-            onClick={handleNewAnalysis}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
-            New Analysis
-          </button>
+          {analysisResult && (
+            <button
+              onClick={handleNewAnalysis}
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              New Analysis
+            </button>
+          )}
         </div>
       </div>
     </header>
