@@ -12,6 +12,8 @@
 
 # testing
 /coverage
+/__tests__
+/test-*.{js,ts,txt}
 
 # next.js
 /.next/

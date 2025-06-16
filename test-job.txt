@@ -1,0 +1,40 @@
+Senior Full Stack Developer
+
+We are looking for an experienced Full Stack Developer to join our growing team. The ideal candidate will have strong experience with modern web technologies and a passion for building scalable applications.
+
+Requirements:
+- 5+ years of experience in full-stack development
+- Strong proficiency in JavaScript/TypeScript
+- Extensive experience with React and Node.js
+- Experience with cloud platforms (AWS preferred)
+- Knowledge of CI/CD practices and tools
+- Experience with both SQL and NoSQL databases
+- Strong understanding of RESTful APIs
+- Experience with microservices architecture
+- Excellent problem-solving skills
+- Strong communication and collaboration abilities
+
+Nice to have:
+- Experience with GraphQL
+- Knowledge of containerization (Docker, Kubernetes)
+- Experience with serverless architecture
+- Contributions to open-source projects
+- Experience mentoring junior developers
+
+Responsibilities:
+- Design and implement scalable web applications
+- Write clean, maintainable, and efficient code
+- Collaborate with cross-functional teams
+- Participate in code reviews and technical discussions
+- Mentor junior developers
+- Stay up-to-date with emerging technologies
+- Contribute to architectural decisions
+- Implement best practices for code quality and testing
+
+Our tech stack:
+- Frontend: React, TypeScript, Redux
+- Backend: Node.js, Express
+- Databases: PostgreSQL, MongoDB
+- Cloud: AWS
+- DevOps: Docker, GitHub Actions
+- Testing: Jest, React Testing Library 
