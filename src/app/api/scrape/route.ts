@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { chromium } from 'playwright';
+import puppeteer from 'puppeteer-core';
+import chromium from '@sparticuz/chromium';
 import { ChatOpenAI } from '@langchain/openai';
 import { StringOutputParser } from '@langchain/core/output_parsers';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
@@ -46,25 +47,39 @@ Extracted Job Posting:
 async function scrapeWebpage(url: string): Promise<string> {
   console.log('Starting webpage scrape for:', url);
   
-  const browser = await chromium.launch({
-    headless: true,
-  });
+  // Configure browser options for serverless environment
+  const isProduction = process.env.NODE_ENV === 'production';
+  
+  const browserOptions = isProduction 
+    ? {
+        args: chromium.args,
+        executablePath: await chromium.executablePath(),
+        headless: true,
+        ignoreHTTPSErrors: true,
+      }
+    : {
+        // Local development - use system Chrome
+        executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      };
+
+  const browser = await puppeteer.launch(browserOptions);
   
   try {
-    const context = await browser.newContext({
-      userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-    });
+    const page = await browser.newPage();
     
-    const page = await context.newPage();
+    // Set user agent
+    await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
     
-    // Set a reasonable timeout
+    // Set reasonable timeout
     await page.goto(url, { 
       waitUntil: 'domcontentloaded',
       timeout: 30000 
     });
     
     // Wait for content to load
-    await page.waitForTimeout(2000);
+    await new Promise(resolve => setTimeout(resolve, 2000));
     
     // Extract text content from the page
     const content = await page.evaluate(() => {
