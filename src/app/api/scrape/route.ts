@@ -8,7 +8,7 @@ import {
   setCachedJobPosting, 
   generateUrlHash 
 } from '@/utils/redis';
-import { ScrapeResponse, ScrapeApiResponse } from '@/types/scraping';
+import { ScrapeResponse, ScrapeErrorResponse, ScrapeApiResponse } from '@/types/scraping';
 
 // Initialize OpenAI chat model
 const chatModel = new ChatOpenAI({
@@ -126,17 +126,19 @@ export async function POST(request: NextRequest): Promise<NextResponse<ScrapeApi
     const { url } = await request.json();
     
     if (!url || typeof url !== 'string') {
-      return NextResponse.json(
-        { error: 'URL is required and must be a string' },
-        { status: 400 }
-      );
+      const errorResponse: ScrapeErrorResponse = {
+        success: false,
+        error: 'URL is required and must be a string'
+      };
+      return NextResponse.json(errorResponse, { status: 400 });
     }
     
     if (!isValidUrl(url)) {
-      return NextResponse.json(
-        { error: 'Invalid URL format. Please provide a valid HTTP or HTTPS URL.' },
-        { status: 400 }
-      );
+      const errorResponse: ScrapeErrorResponse = {
+        success: false,
+        error: 'Invalid URL format. Please provide a valid HTTP or HTTPS URL.'
+      };
+      return NextResponse.json(errorResponse, { status: 400 });
     }
     
     console.log('Processing URL:', url);
@@ -170,20 +172,22 @@ export async function POST(request: NextRequest): Promise<NextResponse<ScrapeApi
       const scrapedContent = await scrapeWebpage(url);
       
       if (!scrapedContent || scrapedContent.trim().length < 100) {
-        return NextResponse.json(
-          { error: 'Could not extract sufficient content from the webpage. The page might be protected or contain minimal text.' },
-          { status: 400 }
-        );
+        const errorResponse: ScrapeErrorResponse = {
+          success: false,
+          error: 'Could not extract sufficient content from the webpage. The page might be protected or contain minimal text.'
+        };
+        return NextResponse.json(errorResponse, { status: 400 });
       }
       
       // Extract job posting using AI
       const extractedJobPosting = await extractJobPosting(scrapedContent);
       
       if (extractedJobPosting.includes('INVALID_JOB_POSTING')) {
-        return NextResponse.json(
-          { error: 'The provided URL does not appear to contain a valid job posting. Please check the URL and try again.' },
-          { status: 400 }
-        );
+        const errorResponse: ScrapeErrorResponse = {
+          success: false,
+          error: 'The provided URL does not appear to contain a valid job posting. Please check the URL and try again.'
+        };
+        return NextResponse.json(errorResponse, { status: 400 });
       }
       
       // Store in Redis cache (4 hour TTL)
@@ -204,18 +208,21 @@ export async function POST(request: NextRequest): Promise<NextResponse<ScrapeApi
       
     } catch (scrapeError) {
       console.error('Scraping error:', scrapeError);
-      return NextResponse.json(
-        { error: 'Failed to scrape webpage. The site might be protected, require authentication, or be temporarily unavailable.' },
-        { status: 500 }
-      );
+      const errorResponse: ScrapeErrorResponse = {
+        success: false,
+        error: 'Failed to scrape webpage. The site might be protected, require authentication, or be temporarily unavailable.',
+        details: scrapeError instanceof Error ? scrapeError.message : 'Unknown error'
+      };
+      return NextResponse.json(errorResponse, { status: 500 });
     }
     
   } catch (error) {
     console.error('Error processing scrape request:', error);
-    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-    return NextResponse.json(
-      { error: 'Failed to process request', details: errorMessage },
-      { status: 500 }
-    );
+    const errorResponse: ScrapeErrorResponse = {
+      success: false,
+      error: 'Failed to process request',
+      details: error instanceof Error ? error.message : 'An unknown error occurred'
+    };
+    return NextResponse.json(errorResponse, { status: 500 });
   }
 }
