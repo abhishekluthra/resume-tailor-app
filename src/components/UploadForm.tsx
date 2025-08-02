@@ -20,7 +20,7 @@ export function UploadForm() {
   const [file, setFile] = useState<File | null>(null);
   const [jobPosting, setJobPosting] = useState('');
   const [jobUrl, setJobUrl] = useState('');
-  const [jobInputMode, setJobInputMode] = useState<JobInputMode>('text');
+  const [jobInputMode, setJobInputMode] = useState<JobInputMode>('url');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loadingProgress, setLoadingProgress] = useState(0);
@@ -194,19 +194,8 @@ export function UploadForm() {
             Job Posting Information
           </label>
           
-          {/* Toggle between text and URL input */}
+          {/* Toggle between URL and text input */}
           <div className="flex rounded-lg bg-gray-100 p-1 mb-4">
-            <button
-              type="button"
-              onClick={() => setJobInputMode('text')}
-              className={`flex-1 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-                jobInputMode === 'text'
-                  ? 'bg-white text-blue-600 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              📝 Paste Text
-            </button>
             <button
               type="button"
               onClick={() => setJobInputMode('url')}
@@ -217,6 +206,17 @@ export function UploadForm() {
               }`}
             >
               🔗 Enter URL
+            </button>
+            <button
+              type="button"
+              onClick={() => setJobInputMode('text')}
+              className={`flex-1 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                jobInputMode === 'text'
+                  ? 'bg-white text-blue-600 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              📝 Paste Text
             </button>
           </div>
 

@@ -205,9 +205,9 @@ export async function POST(request: NextRequest): Promise<NextResponse<ScrapeApi
         return NextResponse.json(errorResponse, { status: 400 });
       }
       
-      // Store in Redis cache (4 hour TTL)
+      // Store in Redis cache (30 day TTL)
       try {
-        await setCachedJobPosting(url, extractedJobPosting, 4);
+        await setCachedJobPosting(url, extractedJobPosting, 720);
       } catch (cacheError) {
         console.warn('Failed to cache result, but continuing:', cacheError);
       }

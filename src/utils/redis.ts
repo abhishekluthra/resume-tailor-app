@@ -79,7 +79,7 @@ export async function getCachedJobPosting(url: string): Promise<CachedJobPosting
 export async function setCachedJobPosting(
   url: string, 
   jobPosting: string, 
-  ttlHours: number = 4
+  ttlHours: number = 720
 ): Promise<void> {
   try {
     const client = await getRedisClient();
