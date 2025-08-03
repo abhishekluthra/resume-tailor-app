@@ -45,7 +45,9 @@ export function TabContainer({ tabs, defaultActiveTab, className = '' }: TabCont
           {tabs.map((tab, index) => (
             <button
               key={tab.id}
-              ref={(el) => (tabRefs.current[index] = el)}
+              ref={(el) => {
+                tabRefs.current[index] = el;
+              }}
               onClick={() => setActiveTab(tab.id)}
               onKeyDown={(e) => handleKeyDown(e, index)}
               className={`whitespace-nowrap py-3 px-2 sm:px-1 border-b-2 font-medium text-sm min-h-[44px] transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
