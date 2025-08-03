@@ -3,12 +3,15 @@
 import { useAnalysis } from '@/context/AnalysisContext';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { getScoreColor, getImpactColor } from '@/utils/colors';
+import { getScoreColor } from '@/utils/colors';
 import { 
   AnalysisResult, 
   InvalidJobPostingError,
   isInvalidJobPostingError 
 } from '@/types/resume-analysis';
+import { TabContainer } from '@/components/TabContainer';
+import { JobAnalysisTab } from '@/components/JobAnalysisTab';
+import { RecommendationsTab } from '@/components/RecommendationsTab';
 
 // Component for displaying invalid job posting error
 function InvalidJobPostingDisplay({ errorData }: { errorData: InvalidJobPostingError }) {
@@ -129,55 +132,22 @@ function AnalysisResultDisplay({ analysisResult }: { analysisResult: AnalysisRes
           <p className="text-gray-600">{analysisResult.executiveSummary}</p>
         </div>
 
-        {/* Job Analysis */}
-        <div className="mb-8">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Job Analysis</h2>
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-md font-medium text-gray-700 mb-2">Required Skills</h3>
-              <ul className="list-disc list-inside text-gray-600">
-                {analysisResult.jobAnalysis.requiredSkills.map((skill, index) => (
-                  <li key={index}>{skill}</li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-md font-medium text-gray-700 mb-2">Key Experiences</h3>
-              <ul className="list-disc list-inside text-gray-600">
-                {analysisResult.jobAnalysis.keyExperiences.map((exp, index) => (
-                  <li key={index}>{exp}</li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-md font-medium text-gray-700 mb-2">Primary Responsibilities</h3>
-              <ul className="list-disc list-inside text-gray-600">
-                {analysisResult.jobAnalysis.primaryResponsibilities.map((resp, index) => (
-                  <li key={index}>{resp}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        {/* Recommendations */}
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Recommendations</h2>
-          <div className="space-y-4">
-            {analysisResult.recommendations.map((rec) => (
-              <div key={rec.id} className="border rounded-lg p-4">
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="text-md font-medium text-gray-900">{rec.title}</h3>
-                  <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${getImpactColor(rec.impact)}`}>
-                    {rec.impact} Impact
-                  </span>
-                </div>
-                <p className="text-gray-600">{rec.description}</p>
-                <span className="inline-block mt-2 text-xs text-gray-500">{rec.category}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+        {/* Tabbed Content */}
+        <TabContainer
+          tabs={[
+            {
+              id: 'job-analysis',
+              label: 'Job Analysis',
+              content: <JobAnalysisTab jobAnalysis={analysisResult.jobAnalysis} />
+            },
+            {
+              id: 'recommendations',
+              label: 'Recommendations',
+              content: <RecommendationsTab recommendations={analysisResult.recommendations} />
+            }
+          ]}
+          defaultActiveTab="job-analysis"
+        />
       </div>
     </div>
   );
