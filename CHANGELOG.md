@@ -1,6 +1,16 @@
 # Changelog
 
-All notable changes to ResuMold will be documented in this file.
+All notable changes to AlignMyResume will be documented in this file.
+
+## [2.0.0] - 2025-01-09
+### Changed
+- **Complete Rebrand**: Application renamed from ResuMold to AlignMyResume
+- **Brand Identity**: Updated all user-facing text, branding, and messaging to emphasize "alignment" concept  
+- **Domain Migration**: All references updated to alignmyresume.com
+- **Package Configuration**: Updated package.json name to "align-my-resume"
+- **Documentation**: Complete update of README.md, CLAUDE.md, and all project documentation
+- **Messaging**: Hero tagline changed to "Align your resume with your dream job"
+- **Feature Language**: Updated all descriptions to use alignment-focused terminology
 
 ## [Latest] - 2025-08-06
 ### Changed

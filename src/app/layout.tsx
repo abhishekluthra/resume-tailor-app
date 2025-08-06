@@ -18,8 +18,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ResuMold - Optimize Your Resume for Job Applications",
-  description: "Upload your resume and job posting to get personalized recommendations and learn resume best practices.",
+  title: "AlignMyResume - Optimize Your Resume for Job Applications",
+  description: "Upload your resume and job posting to get personalized recommendations and align your resume with your dream job.",
 };
 
 export default function RootLayout({

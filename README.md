@@ -1,6 +1,6 @@
-# ResuMold
+# AlignMyResume
 
-ResuMold is a modern web application that helps job seekers optimize their resumes for specific job postings using AI-powered analysis. The application provides personalized recommendations and insights to improve resume effectiveness.
+AlignMyResume is a modern web application that helps job seekers align their resumes perfectly with specific job postings using AI-powered analysis. The application provides personalized recommendations and insights to improve resume effectiveness.
 
 ## Features
 
@@ -34,8 +34,8 @@ ResuMold is a modern web application that helps job seekers optimize their resum
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/resumold.git
-   cd resumold
+   git clone https://github.com/yourusername/align-my-resume.git
+   cd align-my-resume
    ```
 
 2. Install dependencies:
@@ -70,7 +70,7 @@ ResuMold is a modern web application that helps job seekers optimize their resum
 ## Project Structure
 
 ```
-resumold/
+align-my-resume/
 ├── src/
 │   ├── app/              # Next.js app directory
 │   ├── components/       # React components
@@ -102,7 +102,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Disclaimer
 
-This application is currently in beta and under active development. Features may change and some functionality may be limited. The tool is designed for educational purposes and should be used as a guide rather than a definitive solution for resume optimization.
+This application is currently in beta and under active development. Features may change and some functionality may be limited. The tool is designed for educational purposes and should be used as a guide rather than a definitive solution for resume alignment.
 
 ## Acknowledgments
 

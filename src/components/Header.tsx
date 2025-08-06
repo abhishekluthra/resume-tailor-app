@@ -22,7 +22,7 @@ export function Header() {
           
           {/* Centered title */}
           <Link href="/" className="text-xl font-bold text-gray-900">
-            ResuMold
+            AlignMyResume
           </Link>
           
           {/* Right side button */}

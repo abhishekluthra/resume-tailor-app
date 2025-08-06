@@ -24,14 +24,14 @@ export default function Home() {
                 <div className="space-y-4 mb-8">
                   <h1 className="text-5xl md:text-6xl font-extrabold text-gray-900 leading-tight">
                     <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                      ResuMold
+                      AlignMyResume
                     </span>
                   </h1>
                   <h2 className="text-2xl md:text-3xl font-bold text-gray-800 max-w-4xl mx-auto">
-                    Mold your resume to fit the job you want
+                    Align your resume with your dream job
                   </h2>
                   <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-                    Get personalized analysis and AI-powered recommendations to optimize your resume for any job posting
+                    Get personalized analysis and AI-powered recommendations to perfectly align your resume for any job posting
                   </p>
                 </div>
 
@@ -65,7 +65,7 @@ export default function Home() {
             <div className="text-center mb-16">
               <h3 className="text-3xl font-bold text-gray-900 mb-4">How It Works</h3>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                Get your resume optimized in three simple steps
+                Align your resume perfectly in three simple steps
               </p>
             </div>
             
@@ -76,7 +76,7 @@ export default function Home() {
                 </div>
                 <h4 className="text-xl font-semibold text-gray-900 mb-3">Upload Documents</h4>
                 <p className="text-gray-600">
-                  Upload your current resume and the job posting you&apos;re interested in
+                  Upload your current resume and the job posting you want to align with
                 </p>
               </div>
               
@@ -86,7 +86,7 @@ export default function Home() {
                 </div>
                 <h4 className="text-xl font-semibold text-gray-900 mb-3">AI Analysis</h4>
                 <p className="text-gray-600">
-                  Our AI analyzes your resume against the job requirements and industry standards
+                  Our AI analyzes how well your resume aligns with the job requirements and industry standards
                 </p>
               </div>
               
@@ -94,9 +94,9 @@ export default function Home() {
                 <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-purple-200 transition-colors">
                   <span className="text-2xl font-bold text-purple-600">3</span>
                 </div>
-                <h4 className="text-xl font-semibold text-gray-900 mb-3">Get Recommendations</h4>
+                <h4 className="text-xl font-semibold text-gray-900 mb-3">Get Alignment Report</h4>
                 <p className="text-gray-600">
-                  Receive detailed feedback and actionable suggestions to improve your resume
+                  Receive detailed feedback and actionable suggestions to perfectly align your resume
                 </p>
               </div>
             </div>
@@ -109,7 +109,7 @@ export default function Home() {
                 Ready to get started?
               </h3>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                Upload your resume and job posting below to receive your personalized analysis
+                Upload your resume and job posting below to receive your personalized alignment analysis
               </p>
             </div>
             
