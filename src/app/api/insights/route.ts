@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { JobAnalysis } from '@/types/resume-analysis';
 import { createHash } from 'crypto';
-import { getCachedJobPosting, setCachedJobPosting } from '@/utils/redis';
+import { getCachedJobPosting, setCachedJobPosting } from '@/lib/redis';
 
 // Initialize OpenAI client
 const openai = new OpenAI({

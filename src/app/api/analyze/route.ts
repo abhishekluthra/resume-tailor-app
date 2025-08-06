@@ -7,7 +7,7 @@ import {
   isInvalidJobPostingError,
   Recommendation 
 } from '@/types/resume-analysis';
-import { SYSTEM_PROMPT, createUserPrompt } from '@/utils/prompts';
+import { SYSTEM_PROMPT, createUserPrompt } from '@/lib/prompts';
 
 // Initialize OpenAI client
 const openai = new OpenAI({

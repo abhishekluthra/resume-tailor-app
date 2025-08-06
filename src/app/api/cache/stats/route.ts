@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getCacheStats } from '@/utils/redis';
+import { getCacheStats } from '@/lib/redis';
 import { CacheStatsResponse } from '@/types/scraping';
 
 // GET /api/cache/stats - Get cache statistics (for monitoring/debugging)

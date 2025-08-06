@@ -8,7 +8,7 @@ import {
   getCachedJobPosting, 
   setCachedJobPosting, 
   generateUrlHash 
-} from '@/utils/redis';
+} from '@/lib/redis';
 import { ScrapeResponse, ScrapeErrorResponse, ScrapeApiResponse } from '@/types/scraping';
 
 // Initialize OpenAI chat model
