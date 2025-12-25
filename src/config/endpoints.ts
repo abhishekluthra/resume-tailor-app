@@ -22,8 +22,8 @@ const VERCEL_ENDPOINTS = {
 
 // GCP endpoints (Cloud Run services deployed in us-east1)
 const GCP_ENDPOINTS = {
-  analyze: 'https://analyze-ykuwv5z3zq-ue.a.run.app',
-  scrape: 'https://scrape-service-ykuwv5z3zq-ue.a.run.app',
+  analyze: 'https://analyze-ykuwv5z3zq-ue.a.run.app/',
+  scrape: 'https://scrape-service-ykuwv5z3zq-ue.a.run.app/scrape',
   insights: 'https://insights-ykuwv5z3zq-ue.a.run.app',
   cacheStats: 'https://cache-stats-ykuwv5z3zq-ue.a.run.app'
 };
@@ -36,7 +36,7 @@ export function getApiEndpoints() {
   if (isGcpMigration) {
     return GCP_ENDPOINTS;
   }
-  
+
   // Default to Vercel endpoints
   return VERCEL_ENDPOINTS;
 }
