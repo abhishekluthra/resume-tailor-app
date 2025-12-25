@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { JobAnalysis } from '@/types/resume-analysis';
+import { endpoints } from '@/config/endpoints';
 
 interface AIInsight {
   category: 'market' | 'position' | 'strategic';
@@ -30,7 +31,7 @@ export function AIInsights({ jobAnalysis }: AIInsightsProps) {
       setError(null);
 
       try {
-        const response = await fetch('/api/insights', {
+        const response = await fetch(endpoints.insights, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

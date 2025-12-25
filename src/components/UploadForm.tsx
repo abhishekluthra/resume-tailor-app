@@ -5,11 +5,12 @@ import { useDropzone } from 'react-dropzone';
 import { LoadingModal } from './LoadingModal';
 import { useRouter } from 'next/navigation';
 import { useAnalysis } from '@/context/AnalysisContext';
-import { 
-  JobInputMode, 
-  ScrapeApiResponse, 
+import { endpoints } from '@/config/endpoints';
+import {
+  JobInputMode,
+  ScrapeApiResponse,
   isScrapeSuccessResponse,
-  isScrapeErrorResponse 
+  isScrapeErrorResponse
 } from '@/types/scraping';
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB in bytes
@@ -79,8 +80,8 @@ export function UploadForm() {
       if (jobInputMode === 'url') {
         setLoadingStep('Connecting to webpage...');
         setLoadingProgress(15);
-        
-        const scrapeResponse = await fetch('/api/scrape', {
+
+        const scrapeResponse = await fetch(endpoints.scrape, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -120,7 +121,7 @@ export function UploadForm() {
       formData.append('resume', file);
       formData.append('jobPosting', finalJobPosting);
 
-      const response = await fetch('/api/analyze', {
+      const response = await fetch(endpoints.analyze, {
         method: 'POST',
         body: formData,
       });
