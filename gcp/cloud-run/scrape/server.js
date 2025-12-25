@@ -131,14 +131,14 @@ async function scrapeWebpage(url) {
     await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
     await page.setViewport({ width: 1920, height: 1080 });
     
-    // Navigate to page
-    await page.goto(url, { 
-      waitUntil: 'domcontentloaded',
-      timeout: 30000 
+    // Navigate to page with increased timeout for complex job boards
+    await page.goto(url, {
+      waitUntil: 'networkidle2',  // Wait until network is mostly idle
+      timeout: 50000  // Increased to 50s (Cloud Run allows 60s total)
     });
-    
-    // Wait for content to load
-    await new Promise(resolve => setTimeout(resolve, 3000));
+
+    // Additional wait for dynamic content (reduced since networkidle2 waits longer)
+    await new Promise(resolve => setTimeout(resolve, 2000));
     
     // Extract text content from the page
     const content = await page.evaluate(() => {
