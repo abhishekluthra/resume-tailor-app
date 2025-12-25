@@ -158,13 +158,13 @@ AlignMyResume uses a selective microservices approach, splitting workloads betwe
                                  ▼
 ┌─────────────────────────────────────────────────────────────────────────────────┐
 │                           VERCEL (Frontend)                                     │
-│  ┌──────────────────────────────────────────────────────────────────────────┐  │
-│  │  Next.js 15 App                                                          │  │
-│  │  - React 19 UI Components                                                │  │
-│  │  - Context API (State Management)                                        │  │
-│  │  - Dynamic Endpoint Switching (NEXT_PUBLIC_USE_GCP)                      │  │
-│  └──────────────────────────────────────────────────────────────────────────┘  │
-└────────┬──────────────┬──────────────┬──────────────┬──────────────────────────┘
+│  ┌──────────────────────────────────────────────────────────────────────────┐   │
+│  │  Next.js 15 App                                                          │   │
+│  │  - React 19 UI Components                                                │   │
+│  │  - Context API (State Management)                                        │   │
+│  │  - Dynamic Endpoint Switching (NEXT_PUBLIC_USE_GCP)                      │   │
+│  └──────────────────────────────────────────────────────────────────────────┘   │
+└────────┬──────────────┬──────────────┬──────────────┬──────────────────────────-┘
          │              │              │              │
          │ POST /scrape │ POST         │ POST         │ GET
          │              │ /analyze     │ /insights    │ /cache-stats
@@ -172,40 +172,40 @@ AlignMyResume uses a selective microservices approach, splitting workloads betwe
 ┌─────────────────────────────────────────────────────────────────────────────────┐
 │                      GOOGLE CLOUD PLATFORM (Backend)                            │
 │                                                                                 │
-│  ┌───────────────┐  ┌───────────────┐  ┌───────────────┐  ┌───────────────┐  │
-│  │ Scrape Service│  │Analyze Service│  │Insights Service│  │ Cache Stats   │  │
-│  │ (Cloud Run)   │  │(Cloud Function│  │(Cloud Function│  │(Cloud Function│  │
-│  │               │  │     Gen2)     │  │     Gen2)     │  │     Gen2)     │  │
-│  ├───────────────┤  ├───────────────┤  ├───────────────┤  ├───────────────┤  │
-│  │• Puppeteer    │  │• OpenAI API   │  │• OpenAI API   │  │• Redis Client │  │
-│  │• LangChain    │  │• GPT-4o-mini  │  │• GPT-4o-mini  │  │• Stats API    │  │
-│  │• Redis Cache  │  │• Resume Parse │  │• Redis Cache  │  │               │  │
-│  │• 50s Timeout  │  │• Job Analysis │  │• AI Insights  │  │               │  │
-│  └───────┬───────┘  └───────┬───────┘  └───────┬───────┘  └───────┬───────┘  │
-│          │                  │                  │                  │          │
-│          │                  │                  │                  │          │
-│          └──────────────────┴──────────────────┴──────────────────┘          │
-│                                      │                                        │
-│                         VPC Connector (alignmyresume-connector)               │
-│                              10.9.0.0/28 (Private Network)                    │
-│                                      │                                        │
-│                                      ▼                                        │
-│  ┌─────────────────────────────────────────────────────────────────────────┐ │
-│  │              Redis Memorystore (1GB BASIC)                              │ │
-│  │              10.0.0.3:6379 (Private IP)                                 │ │
-│  │                                                                         │ │
-│  │  Cache Keys:                                                            │ │
-│  │  • job_posting:<url_hash>  → Scraped job content (30-day TTL)          │ │
-│  │  • insights:<analysis_hash> → AI insights (30-day TTL)                 │ │
-│  │                                                                         │ │
-│  │  Benefits: 60-80% cost savings through deduplication                   │ │
-│  └─────────────────────────────────────────────────────────────────────────┘ │
+│  ┌───────────────┐  ┌───────────────┐  ┌───────────────┐  ┌───────────────┐     │
+│  │ Scrape Service│  │Analyze Service│  │Insight Service│  │ Cache Stats   │     │
+│  │ (Cloud Run)   │  │(Cloud Function│  │(Cloud Function│  │(Cloud Function│     │
+│  │               │  │     Gen2)     │  │     Gen2)     │  │     Gen2)     │     │
+│  ├───────────────┤  ├───────────────┤  ├───────────────┤  ├───────────────┤     │
+│  │• Puppeteer    │  │• OpenAI API   │  │• OpenAI API   │  │• Redis Client │     │
+│  │• LangChain    │  │• GPT-4o-mini  │  │• GPT-4o-mini  │  │• Stats API    │     │
+│  │• Redis Cache  │  │• Resume Parse │  │• Redis Cache  │  │               │     │
+│  │• 50s Timeout  │  │• Job Analysis │  │• AI Insights  │  │               │     │
+│  └───────┬───────┘  └───────┬───────┘  └───────┬───────┘  └───────┬───────┘     │
+│          │                  │                  │                  │             │
+│          │                  │                  │                  │             │
+│          └──────────────────┴──────────────────┴──────────────────┘             │
+│                                      │                                          │
+│                         VPC Connector (alignmyresume-connector)                 │
+│                              10.9.0.0/28 (Private Network)                      │
+│                                      │                                          │
+│                                      ▼                                          │
+│  ┌─────────────────────────────────────────────────────────────────────────┐    │
+│  │              Redis Memorystore (1GB BASIC)                              │    │
+│  │              10.0.0.3:6379 (Private IP)                                 │    │
+│  │                                                                         │    │
+│  │  Cache Keys:                                                            │    │
+│  │  • job_posting:<url_hash>  → Scraped job content (30-day TTL)           │    │
+│  │  • insights:<analysis_hash> → AI insights (30-day TTL)                  │.   │
+│  │                                                                         │.   │
+│  │  Benefits: 60-80% cost savings through deduplication                    │.   │
+│  └─────────────────────────────────────────────────────────────────────────┘.   │
 │                                                                                 │
-│  ┌─────────────────────────────────────────────────────────────────────────┐  │
-│  │                    Secret Manager                                       │  │
-│  │  • openai-api-key (for all AI services)                                │  │
-│  │  • redis-password (for Memorystore auth)                               │  │
-│  └─────────────────────────────────────────────────────────────────────────┘  │
+│  ┌─────────────────────────────────────────────────────────────────────────┐    │
+│  │                    Secret Manager                                       │    │
+│  │  • openai-api-key (for all AI services)                                 │    │
+│  │  • redis-password (for Memorystore auth)                                │    │
+│  └─────────────────────────────────────────────────────────────────────────┘    │
 └─────────────────────────────────────────────────────────────────────────────────┘
 
 External APIs:
