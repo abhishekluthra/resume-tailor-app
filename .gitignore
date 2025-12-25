@@ -48,3 +48,14 @@ CLAUDE.md
 
 # local development folders
 ai-dev-tasks/
+sdd/
+
+# terraform state files (sensitive data)
+**/*.tfstate
+**/*.tfstate.*
+**/.terraform/
+**/.terraform.lock.hcl
+
+# GCP dependencies and build artifacts
+gcp/**/node_modules/
+gcp/**/dist/

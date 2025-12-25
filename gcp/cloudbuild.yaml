@@ -1,0 +1,119 @@
+# Google Cloud Build configuration for AlignMyResume backend services
+# This file defines the CI/CD pipeline for deploying Cloud Functions and Cloud Run services
+
+steps:
+  # Install dependencies for shared utilities
+  - name: 'node:20-slim'
+    entrypoint: 'npm'
+    args: ['ci']
+    dir: 'gcp/shared'
+    id: 'install-shared-deps'
+
+  # Build and deploy analyze Cloud Function
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        cd gcp/functions/analyze
+        npm ci
+        gcloud functions deploy analyze \
+          --runtime nodejs20 \
+          --trigger-http \
+          --allow-unauthenticated \
+          --memory 512MB \
+          --timeout 15s \
+          --region us-east1 \
+          --service-account alignmyresume-backend@${PROJECT_ID}.iam.gserviceaccount.com \
+          --set-env-vars GOOGLE_CLOUD_PROJECT=${PROJECT_ID}
+    id: 'deploy-analyze-function'
+    waitFor: ['install-shared-deps']
+
+  # Build and deploy insights Cloud Function
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        cd gcp/functions/insights
+        npm ci
+        gcloud functions deploy insights \
+          --runtime nodejs20 \
+          --trigger-http \
+          --allow-unauthenticated \
+          --memory 512MB \
+          --timeout 15s \
+          --region us-east1 \
+          --service-account alignmyresume-backend@${PROJECT_ID}.iam.gserviceaccount.com \
+          --set-env-vars GOOGLE_CLOUD_PROJECT=${PROJECT_ID}
+    id: 'deploy-insights-function'
+    waitFor: ['install-shared-deps']
+
+  # Build and deploy cache-stats Cloud Function
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        cd gcp/functions/cache-stats
+        npm ci
+        gcloud functions deploy cache-stats \
+          --runtime nodejs20 \
+          --trigger-http \
+          --allow-unauthenticated \
+          --memory 512MB \
+          --timeout 15s \
+          --region us-east1 \
+          --service-account alignmyresume-backend@${PROJECT_ID}.iam.gserviceaccount.com \
+          --set-env-vars GOOGLE_CLOUD_PROJECT=${PROJECT_ID}
+    id: 'deploy-cache-stats-function'
+    waitFor: ['install-shared-deps']
+
+  # Build and deploy scrape Cloud Run service
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'build',
+      '-t', 'gcr.io/${PROJECT_ID}/scrape-service:${BUILD_ID}',
+      '-t', 'gcr.io/${PROJECT_ID}/scrape-service:latest',
+      'gcp/cloud-run/scrape'
+    ]
+    id: 'build-scrape-image'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'push',
+      'gcr.io/${PROJECT_ID}/scrape-service:${BUILD_ID}'
+    ]
+    id: 'push-scrape-image'
+    waitFor: ['build-scrape-image']
+
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+    entrypoint: 'gcloud'
+    args: [
+      'run', 'deploy', 'scrape-service',
+      '--image', 'gcr.io/${PROJECT_ID}/scrape-service:${BUILD_ID}',
+      '--region', 'us-east1',
+      '--platform', 'managed',
+      '--allow-unauthenticated',
+      '--memory', '2Gi',
+      '--timeout', '30s',
+      '--max-instances', '10',
+      '--service-account', 'alignmyresume-backend@${PROJECT_ID}.iam.gserviceaccount.com',
+      '--set-env-vars', 'GOOGLE_CLOUD_PROJECT=${PROJECT_ID}',
+      '--tag', 'latest'
+    ]
+    id: 'deploy-scrape-service'
+    waitFor: ['push-scrape-image']
+
+# Logs and artifacts
+options:
+  logging: CLOUD_LOGGING_ONLY
+  machineType: 'E2_HIGHCPU_8'
+
+# Timeout for the entire build
+timeout: '1200s'
+
+# Substitutions for environment-specific values
+substitutions:
+  _REGION: 'us-east1'
+  _ENVIRONMENT: 'dev'
