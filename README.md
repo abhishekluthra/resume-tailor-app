@@ -148,6 +148,93 @@ resume-tailor-app/
 ### Hybrid Cloud Architecture
 AlignMyResume uses a selective microservices approach, splitting workloads between Vercel and GCP:
 
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                                    USER                                         │
+│                            (Browser / Mobile)                                   │
+└────────────────────────────────┬────────────────────────────────────────────────┘
+                                 │
+                                 │ HTTPS
+                                 ▼
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                           VERCEL (Frontend)                                     │
+│  ┌──────────────────────────────────────────────────────────────────────────┐  │
+│  │  Next.js 15 App                                                          │  │
+│  │  - React 19 UI Components                                                │  │
+│  │  - Context API (State Management)                                        │  │
+│  │  - Dynamic Endpoint Switching (NEXT_PUBLIC_USE_GCP)                      │  │
+│  └──────────────────────────────────────────────────────────────────────────┘  │
+└────────┬──────────────┬──────────────┬──────────────┬──────────────────────────┘
+         │              │              │              │
+         │ POST /scrape │ POST         │ POST         │ GET
+         │              │ /analyze     │ /insights    │ /cache-stats
+         ▼              ▼              ▼              ▼
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                      GOOGLE CLOUD PLATFORM (Backend)                            │
+│                                                                                 │
+│  ┌───────────────┐  ┌───────────────┐  ┌───────────────┐  ┌───────────────┐  │
+│  │ Scrape Service│  │Analyze Service│  │Insights Service│  │ Cache Stats   │  │
+│  │ (Cloud Run)   │  │(Cloud Function│  │(Cloud Function│  │(Cloud Function│  │
+│  │               │  │     Gen2)     │  │     Gen2)     │  │     Gen2)     │  │
+│  ├───────────────┤  ├───────────────┤  ├───────────────┤  ├───────────────┤  │
+│  │• Puppeteer    │  │• OpenAI API   │  │• OpenAI API   │  │• Redis Client │  │
+│  │• LangChain    │  │• GPT-4o-mini  │  │• GPT-4o-mini  │  │• Stats API    │  │
+│  │• Redis Cache  │  │• Resume Parse │  │• Redis Cache  │  │               │  │
+│  │• 50s Timeout  │  │• Job Analysis │  │• AI Insights  │  │               │  │
+│  └───────┬───────┘  └───────┬───────┘  └───────┬───────┘  └───────┬───────┘  │
+│          │                  │                  │                  │          │
+│          │                  │                  │                  │          │
+│          └──────────────────┴──────────────────┴──────────────────┘          │
+│                                      │                                        │
+│                         VPC Connector (alignmyresume-connector)               │
+│                              10.9.0.0/28 (Private Network)                    │
+│                                      │                                        │
+│                                      ▼                                        │
+│  ┌─────────────────────────────────────────────────────────────────────────┐ │
+│  │              Redis Memorystore (1GB BASIC)                              │ │
+│  │              10.0.0.3:6379 (Private IP)                                 │ │
+│  │                                                                         │ │
+│  │  Cache Keys:                                                            │ │
+│  │  • job_posting:<url_hash>  → Scraped job content (30-day TTL)          │ │
+│  │  • insights:<analysis_hash> → AI insights (30-day TTL)                 │ │
+│  │                                                                         │ │
+│  │  Benefits: 60-80% cost savings through deduplication                   │ │
+│  └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                                 │
+│  ┌─────────────────────────────────────────────────────────────────────────┐  │
+│  │                    Secret Manager                                       │  │
+│  │  • openai-api-key (for all AI services)                                │  │
+│  │  • redis-password (for Memorystore auth)                               │  │
+│  └─────────────────────────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+External APIs:
+    │
+    └──► OpenAI GPT-4o-mini API (via HTTPS)
+         - Resume analysis
+         - Job posting extraction
+         - Strategic insights generation
+
+Request Flow Example (URL Scraping):
+─────────────────────────────────────
+1. User uploads resume + enters job URL
+2. Frontend → Scrape Service (check Redis cache by URL hash)
+3. Cache MISS → Puppeteer scrapes page → LangChain extracts job posting → Cache result
+4. Frontend → Analyze Service (resume + job posting → OpenAI GPT-4o-mini)
+5. Frontend → Insights Service (check Redis cache by analysis hash)
+6. Cache MISS → Generate AI insights → Cache result
+7. Frontend displays: Job Analysis + Recommendations + AI Insights
+
+Cost Optimization:
+──────────────────
+• Redis caching: ~60-80% API cost reduction
+• Cloud Run: Pay-per-request, auto-scaling (0-3 instances)
+• GPT-4o-mini: Cost-optimized model vs GPT-4
+• 30-day cache TTL: Balance freshness vs savings
+• Projected monthly cost: ~$75-85 (under $100 budget)
+```
+
+
 **Frontend (Vercel)**:
 - Next.js application with SSR and client-side routing
 - Fast global CDN distribution
