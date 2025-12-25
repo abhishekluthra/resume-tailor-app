@@ -5,6 +5,13 @@
 const isProduction = process.env.NODE_ENV === 'production';
 const isGcpMigration = process.env.NEXT_PUBLIC_USE_GCP === 'true';
 
+// Debug logging (remove in production)
+if (typeof window !== 'undefined') {
+  console.log('[Endpoints] NEXT_PUBLIC_USE_GCP:', process.env.NEXT_PUBLIC_USE_GCP);
+  console.log('[Endpoints] isGcpMigration:', isGcpMigration);
+  console.log('[Endpoints] Using provider:', isGcpMigration ? 'GCP' : 'Vercel');
+}
+
 // Vercel API endpoints (current)
 const VERCEL_ENDPOINTS = {
   analyze: '/api/analyze',
@@ -15,8 +22,8 @@ const VERCEL_ENDPOINTS = {
 
 // GCP endpoints (Cloud Run services deployed in us-east1)
 const GCP_ENDPOINTS = {
-  analyze: 'https://analyze-ykuwv5z3zq-ue.a.run.app',
-  scrape: 'https://scrape-service-ykuwv5z3zq-ue.a.run.app',
+  analyze: 'https://analyze-672690422753.us-east1.run.app',
+  scrape: 'https://scrape-service-672690422753.us-east1.run.app',
   insights: 'https://insights-ykuwv5z3zq-ue.a.run.app',
   cacheStats: 'https://cache-stats-ykuwv5z3zq-ue.a.run.app'
 };

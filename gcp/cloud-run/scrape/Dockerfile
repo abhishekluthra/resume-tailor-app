@@ -41,6 +41,7 @@ RUN npm ci --only=production
 
 # Copy application code
 COPY server.js ./
+COPY lib/ ./lib/
 
 # Change ownership to non-root user
 RUN chown -R scraper:scraper /usr/src/app

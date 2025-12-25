@@ -2,6 +2,7 @@ const functions = require('@google-cloud/functions-framework');
 const { SecretManagerServiceClient } = require('@google-cloud/secret-manager');
 const OpenAI = require('openai');
 const crypto = require('crypto');
+const { getCachedInsights, setCachedInsights } = require('./lib/cache');
 
 // Initialize Secret Manager client
 const secretClient = new SecretManagerServiceClient();
@@ -210,21 +211,36 @@ functions.http('insights', async (req, res) => {
       keyExperiencesCount: jobAnalysis.keyExperiences.length,
       primaryResponsibilitiesCount: jobAnalysis.primaryResponsibilities.length
     });
-    
+
     try {
-      // Generate fresh insights (no caching in this simplified version)
-      console.log(`[${requestId}] Generating fresh insights with OpenAI...`);
-      
+      // Generate hash for caching
+      const jobAnalysisHash = generateJobAnalysisHash(jobAnalysis);
+      console.log(`[${requestId}] Job analysis hash:`, jobAnalysisHash);
+
+      // Check cache first
+      const cachedInsights = await getCachedInsights(jobAnalysisHash);
+
+      if (cachedInsights) {
+        console.log(`[${requestId}] Cache HIT - returning cached insights`);
+        return res.json(cachedInsights.insights);
+      }
+
+      // Cache MISS - generate fresh insights
+      console.log(`[${requestId}] Cache MISS - generating fresh insights with OpenAI...`);
+
       const startTime = Date.now();
       const insights = await generateAIInsights(jobAnalysis);
       const generationTime = Date.now() - startTime;
-      
+
       console.log(`[${requestId}] Fresh insights generated successfully in ${generationTime}ms:`, {
         insightsCount: insights.insights?.length || 0,
         generatedAt: insights.generatedAt,
         categories: insights.insights?.map(i => i.category) || []
       });
-      
+
+      // Cache the result (720 hours = 30 days TTL)
+      await setCachedInsights(jobAnalysisHash, insights, 720);
+
       console.log(`[${requestId}] Returning fresh insights to client`);
       res.json(insights);
       

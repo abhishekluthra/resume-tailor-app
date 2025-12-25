@@ -6,6 +6,7 @@ const { ChatOpenAI } = require('@langchain/openai');
 const { StringOutputParser } = require('@langchain/core/output_parsers');
 const { ChatPromptTemplate } = require('@langchain/core/prompts');
 const crypto = require('crypto');
+const { getCachedJobPosting, setCachedJobPosting } = require('./lib/cache');
 
 const app = express();
 const port = process.env.PORT || 8080;
@@ -224,29 +225,46 @@ app.post('/scrape', async (req, res) => {
     }
     
     console.log('Processing URL:', url);
-    
+
     try {
-      // Scrape the webpage
-      console.log('Performing fresh scrape');
+      // Check cache first
+      const cachedData = await getCachedJobPosting(url);
+
+      if (cachedData) {
+        console.log('Cache HIT - returning cached job posting');
+        return res.json({
+          success: true,
+          jobPosting: cachedData.jobPosting,
+          urlHash: cachedData.urlHash,
+          extractedAt: cachedData.extractedAt,
+          fromCache: true
+        });
+      }
+
+      // Cache MISS - scrape the webpage
+      console.log('Cache MISS - performing fresh scrape');
       const scrapedContent = await scrapeWebpage(url);
-      
+
       if (!scrapedContent || scrapedContent.trim().length < 100) {
         return res.status(400).json({
           success: false,
           error: 'Could not extract sufficient content from the webpage. The page might be protected or contain minimal text.'
         });
       }
-      
+
       // Extract job posting using AI
       const extractedJobPosting = await extractJobPosting(scrapedContent);
-      
+
       if (extractedJobPosting.includes('INVALID_JOB_POSTING')) {
         return res.status(400).json({
           success: false,
           error: 'The provided URL does not appear to contain a valid job posting. Please check the URL and try again.'
         });
       }
-      
+
+      // Cache the result (720 hours = 30 days TTL)
+      await setCachedJobPosting(url, extractedJobPosting, 720);
+
       const response = {
         success: true,
         jobPosting: extractedJobPosting,
@@ -254,7 +272,7 @@ app.post('/scrape', async (req, res) => {
         extractedAt: new Date().toISOString(),
         fromCache: false
       };
-      
+
       res.json(response);
       
     } catch (scrapeError) {
