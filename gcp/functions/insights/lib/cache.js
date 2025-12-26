@@ -12,6 +12,18 @@ let redisClient = null;
  */
 async function getRedisClient() {
   if (!redisClient) {
+    // === DEBUG LOGGING START ===
+    console.log('=== REDIS CONNECTION DEBUG ===');
+    console.log('Environment variables:');
+    console.log('  REDIS_HOST:', process.env.REDIS_HOST, '(type:', typeof process.env.REDIS_HOST, ')');
+    console.log('  REDIS_PORT:', process.env.REDIS_PORT, '(type:', typeof process.env.REDIS_PORT, ')');
+    console.log('  REDIS_PASSWORD:', process.env.REDIS_PASSWORD ? '[REDACTED - length:' + process.env.REDIS_PASSWORD.length + ']' : '[NOT SET]');
+    console.log('  REDIS_URL:', process.env.REDIS_URL ? '[REDACTED]' : '[NOT SET]');
+    console.log('  NODE_ENV:', process.env.NODE_ENV);
+    console.log('  All REDIS vars:', Object.keys(process.env).filter(k => k.includes('REDIS')));
+    console.log('=== END DEBUG ===');
+    // === DEBUG LOGGING END ===
+
     // Build Redis URL from environment variables for security
     // Password from Secret Manager, host/port from config
     const redisHost = process.env.REDIS_HOST || 'localhost';
