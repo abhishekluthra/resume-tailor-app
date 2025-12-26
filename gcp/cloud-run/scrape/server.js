@@ -1,10 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const { SecretManagerServiceClient } = require('@google-cloud/secret-manager');
-// LangChain imports removed - extraction moved to Analysis phase
-// const { ChatOpenAI } = require('@langchain/openai');
-// const { StringOutputParser } = require('@langchain/core/output_parsers');
-// const { ChatPromptTemplate } = require('@langchain/core/prompts');
 const crypto = require('crypto');
 const { getCachedJobPosting, setCachedJobPosting } = require('./lib/cache');
 
@@ -14,9 +10,41 @@ const port = process.env.PORT || 8080;
 // Initialize Secret Manager client
 const secretClient = new SecretManagerServiceClient();
 
-// LangChain components (initialized lazily)
-// LangChain initialization removed
-// Initialization logic for ChatModel and PromptTemplate deleted as it is no longer required.
+// Middleware (Order is critical)
+app.use(cors({
+  origin: true, // Reflect request origin
+  credentials: true,
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin']
+}));
+
+// Explicitly handle Preflight
+app.options('*', cors());
+
+// Debug logging middleware
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  console.log('Headers:', JSON.stringify(req.headers));
+  next();
+});
+
+// Body parser
+app.use(express.json({ limit: '10mb' }));
+
+// Check body parsing
+app.use((req, res, next) => {
+  if (req.method === 'POST' && !req.body) {
+    console.error('Body is undefined after express.json()');
+  } else if (req.method === 'POST') {
+    console.log('Body parsed keys:', Object.keys(req.body));
+  }
+  next();
+});
+
+// Inlined utility functions (from shared package)
+function generateUrlHash(url) {
+  return crypto.createHash('sha256').update(url.toLowerCase().trim()).digest('hex');
+}
 
 /**
  * Scrape webpage using Jina AI Reader
@@ -49,11 +77,6 @@ async function scrapeWebpage(url) {
     throw error;
   }
 }
-
-/**
- * Extract job posting using LangChain
- */
-// extractJobPosting function removed
 
 /**
  * Validate URL format
