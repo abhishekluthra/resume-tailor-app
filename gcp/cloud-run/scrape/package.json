@@ -1,13 +1,13 @@
 {
   "name": "scrape-service",
   "version": "1.0.0",
-  "description": "Cloud Run service for web scraping with Puppeteer and LangChain",
+  "description": "Cloud Run service for web scraping with Jina AI",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
     "build": "docker build -t scrape-service .",
-    "deploy": "gcloud run deploy scrape-service --source . --region us-east1 --allow-unauthenticated --memory 2Gi --timeout 30s --max-instances 10"
+    "deploy": "gcloud run deploy scrape-service --source . --region us-east1 --allow-unauthenticated --memory 512Mi --timeout 60s --max-instances 10"
   },
   "dependencies": {
     "express": "^4.21.0",
