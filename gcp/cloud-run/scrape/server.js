@@ -54,24 +54,42 @@ async function scrapeWebpage(url) {
 
   try {
     const jinaUrl = `https://r.jina.ai/${url}`;
-    const response = await fetch(jinaUrl, {
-      method: 'GET',
-      headers: {
-        // Optional: Add 'Authorization': 'Bearer <YOUR_KEY>' if you have one for higher limits
-        'X-Target-Selector': 'body', // Optional: Focus on body
-        'Accept': 'application/json' // Request JSON response to get metadata if needed, or text for raw markdown
+
+    // Increase timeout to 45 seconds for Jina AI processing
+    // Cloud Run service timeout is 60s, so this leaves buffer for cache operations
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 45000);
+
+    try {
+      const response = await fetch(jinaUrl, {
+        method: 'GET',
+        headers: {
+          // Optional: Add 'Authorization': 'Bearer <YOUR_KEY>' if you have one for higher limits
+          'X-Target-Selector': 'body', // Optional: Focus on body
+          'Accept': 'application/json' // Request JSON response to get metadata if needed, or text for raw markdown
+        },
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`Jina AI request failed: ${response.status} ${response.statusText}`);
       }
-    });
 
-    if (!response.ok) {
-      throw new Error(`Jina AI request failed: ${response.status} ${response.statusText}`);
+      // Jina returns the markdown directly in the body
+      const content = await response.text();
+
+      console.log('Jina scrape successful, content length:', content.length);
+      return content;
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+
+      if (fetchError.name === 'AbortError') {
+        throw new Error('Jina AI request timed out after 45 seconds. The page might be too complex or Jina AI is experiencing delays.');
+      }
+      throw fetchError;
     }
-
-    // Jina returns the markdown directly in the body
-    const content = await response.text();
-
-    console.log('Jina scrape successful, content length:', content.length);
-    return content;
   } catch (error) {
     console.error('Jina scrape error:', error);
     throw error;
