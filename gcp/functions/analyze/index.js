@@ -2,18 +2,10 @@ const functions = require('@google-cloud/functions-framework');
 const { SecretManagerServiceClient } = require('@google-cloud/secret-manager');
 const mammoth = require('mammoth');
 const OpenAI = require('openai');
-const multer = require('multer');
+// No multipart parsing library needed - using JSON with base64
 
 // Initialize Secret Manager client
 const secretClient = new SecretManagerServiceClient();
-
-// Multer configuration for file uploads
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: {
-    fileSize: 2 * 1024 * 1024, // 2MB limit
-  }
-});
 
 // OpenAI client (initialized lazily with secret)
 let openai = null;
@@ -145,20 +137,23 @@ function validateAnalysisStructure(analysis) {
 async function initializeOpenAI() {
   if (!openai) {
     try {
+      console.log('Initializing OpenAI client...');
       const projectId = process.env.GOOGLE_CLOUD_PROJECT || 'nurel-app-dev';
       const secretName = `projects/${projectId}/secrets/openai-api-key/versions/latest`;
-      
+      console.log('Fetching secret:', secretName);
+
       const [version] = await secretClient.accessSecretVersion({
         name: secretName,
       });
-      
+      console.log('Secret fetched successfully');
+
       const apiKey = version.payload.data.toString();
       openai = new OpenAI({ apiKey });
-      
+
       console.log('OpenAI client initialized successfully');
     } catch (error) {
       console.error('Failed to initialize OpenAI client:', error);
-      throw new Error('OpenAI API configuration error');
+      throw new Error(`OpenAI API configuration error: ${error.message}`);
     }
   }
   return openai;
@@ -246,37 +241,46 @@ functions.http('analyze', async (req, res) => {
   }
   
   try {
-    // Handle multer middleware manually for Cloud Functions compatibility
-    await new Promise((resolve, reject) => {
-      upload.single('resume')(req, res, (err) => {
-        if (err) reject(err);
-        else resolve();
-      });
-    });
-    
-    const resumeFile = req.file;
-    const jobPosting = req.body.jobPosting;
+    console.log('Parsing JSON request body...');
+    console.log('Content-Type:', req.headers['content-type']);
+    console.log('Content-Length:', req.headers['content-length']);
 
-    if (!resumeFile || !jobPosting) {
+    // Parse JSON body (Cloud Functions Gen2 best practice for file uploads)
+    const { resumeBase64, fileName, mimeType, jobPosting } = req.body;
+
+    console.log('Request body keys:', Object.keys(req.body));
+    console.log('File name:', fileName);
+    console.log('MIME type:', mimeType);
+    console.log('Job posting:', jobPosting ? 'present' : 'missing');
+    console.log('Resume base64:', resumeBase64 ? `${resumeBase64.length} chars` : 'missing');
+
+    if (!resumeBase64 || !jobPosting) {
       return res.status(400).json({
-        error: 'Resume file and job posting are required'
+        error: 'Resume file (base64) and job posting are required'
       });
     }
 
+    // Decode base64 to buffer
+    const fileBuffer = Buffer.from(resumeBase64, 'base64');
+    console.log(`Decoded file buffer: ${fileBuffer.length} bytes`);
+
     // Check file size
-    if (resumeFile.size > 2 * 1024 * 1024) {
+    if (fileBuffer.length > 2 * 1024 * 1024) {
       return res.status(400).json({
         error: 'File size exceeds 2MB limit'
       });
     }
 
-    console.log(`Processing file: ${resumeFile.originalname}, type: ${resumeFile.mimetype}`);
-    
-    const resumeText = await extractTextFromFile(resumeFile.buffer, resumeFile.mimetype);
+    const fileMimeType = mimeType || 'text/plain';
+    console.log(`Processing file: ${fileName}, type: ${fileMimeType}, size: ${fileBuffer.length}`);
+
+    const resumeText = await extractTextFromFile(fileBuffer, fileMimeType);
     console.log(`Resume text extracted, length: ${resumeText.length}`);
 
+    console.log('Starting OpenAI analysis...');
     const result = await analyzeResume(resumeText, jobPosting);
-    
+    console.log('Analysis complete');
+
     res.json(result);
     
   } catch (error) {

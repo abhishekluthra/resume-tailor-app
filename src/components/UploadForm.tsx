@@ -116,14 +116,23 @@ export function UploadForm() {
       // Now analyze with the final job posting text
       setLoadingStep('Analyzing resume against job requirements...');
       setLoadingProgress(80);
-      
-      const formData = new FormData();
-      formData.append('resume', file);
-      formData.append('jobPosting', finalJobPosting);
+
+      // Convert file to base64 (Cloud Functions Gen2 best practice)
+      const arrayBuffer = await file.arrayBuffer();
+      const bytes = new Uint8Array(arrayBuffer);
+      const base64 = btoa(String.fromCharCode(...bytes));
 
       const response = await fetch(endpoints.analyze, {
         method: 'POST',
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          resumeBase64: base64,
+          fileName: file.name,
+          mimeType: file.type,
+          jobPosting: finalJobPosting,
+        }),
       });
 
       if (!response.ok) {
