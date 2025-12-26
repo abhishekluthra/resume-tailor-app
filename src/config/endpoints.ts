@@ -34,6 +34,15 @@ const GCP_ENDPOINTS = {
 export function getApiEndpoints() {
   // During migration, use environment variable to switch
   if (isGcpMigration) {
+    // START: Local Dev Override
+    if (process.env.NEXT_PUBLIC_LOCAL_SCRAPE_URL) {
+      return {
+        ...GCP_ENDPOINTS,
+        scrape: process.env.NEXT_PUBLIC_LOCAL_SCRAPE_URL
+      };
+    }
+    // END: Local Dev Override
+
     return GCP_ENDPOINTS;
   }
 

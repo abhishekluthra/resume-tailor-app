@@ -13,10 +13,6 @@
     "express": "^4.21.0",
     "cors": "^2.8.5",
     "@google-cloud/secret-manager": "^5.0.0",
-    "@langchain/core": "^0.3.64",
-    "@langchain/openai": "^0.6.1",
-    "langchain": "^0.3.30",
-    "puppeteer": "^24.14.0",
     "redis": "^4.7.0"
   },
   "engines": {
